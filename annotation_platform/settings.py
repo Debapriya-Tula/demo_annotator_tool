@@ -5,6 +5,7 @@ Django settings for annotation_platform project.
 import os
 from pathlib import Path
 
+import cloudinary
 import dj_database_url
 from decouple import config
 
@@ -21,6 +22,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.railway.app',
+    'testserver',  # Django test client
 ]
 
 # Application definition
@@ -107,6 +109,17 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 CLOUDINARY_URL = config('CLOUDINARY_URL', default='cloudinary://key:secret@cloud')
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
+
+# Explicitly configure cloudinary so uploader.upload() works
+_cld = CLOUDINARY_URL.replace('cloudinary://', '')
+_auth, _cloud = _cld.rsplit('@', 1)
+_api_key, _api_secret = _auth.split(':', 1)
+cloudinary.config(
+    cloud_name=_cloud,
+    api_key=_api_key,
+    api_secret=_api_secret,
+    secure=True,
+)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Login — AnnotatePro{% endblock %}
+{% block title %}Sign Up — AnnotatePro{% endblock %}
 
 {% block content %}
 <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -9,12 +9,18 @@
     <div class="text-center">
       <div class="text-5xl mb-4">🏷️</div>
       <h1 class="text-3xl font-extrabold text-gray-900">AnnotatePro</h1>
-      <p class="mt-2 text-sm text-gray-500">Data annotation platform for companies and annotators</p>
+      <p class="mt-2 text-sm text-gray-500">Create your account to get started</p>
     </div>
 
     <!-- Card -->
     <div class="bg-white rounded-2xl shadow-md p-8 space-y-6">
-      <h2 class="text-xl font-semibold text-gray-800 text-center">Sign in to your account</h2>
+      <h2 class="text-xl font-semibold text-gray-800 text-center">Create an account</h2>
+
+      {% if form.non_field_errors %}
+        <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+          {{ form.non_field_errors.0 }}
+        </div>
+      {% endif %}
 
       <form method="post" class="space-y-5">
         {% csrf_token %}
@@ -23,7 +29,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">I am a…</label>
           <div class="grid grid-cols-2 gap-3">
-            <label class="role-btn cursor-pointer">
+            <label class="cursor-pointer">
               <input type="radio" name="role" value="company" class="sr-only peer"
                 {% if not form.role.value or form.role.value == 'company' %}checked{% endif %}>
               <div class="flex flex-col items-center justify-center py-3 px-4 rounded-lg border-2
@@ -34,7 +40,7 @@
                 <span class="text-xs text-gray-400">Post tasks</span>
               </div>
             </label>
-            <label class="role-btn cursor-pointer">
+            <label class="cursor-pointer">
               <input type="radio" name="role" value="annotator" class="sr-only peer"
                 {% if form.role.value == 'annotator' %}checked{% endif %}>
               <div class="flex flex-col items-center justify-center py-3 px-4 rounded-lg border-2
@@ -48,23 +54,39 @@
           </div>
         </div>
 
+        <!-- Username -->
         <div>
-          <label for="id_username" class="block text-sm font-medium text-gray-700 mb-1">
-            Username
-          </label>
+          <label for="id_username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
           {{ form.username }}
           {% if form.username.errors %}
             <p class="mt-1 text-xs text-red-600">{{ form.username.errors.0 }}</p>
           {% endif %}
         </div>
 
+        <!-- Email -->
         <div>
-          <label for="id_password" class="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
+          <label for="id_email" class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-gray-400">(optional)</span></label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <p class="mt-1 text-xs text-red-600">{{ form.email.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label for="id_password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
           {{ form.password }}
           {% if form.password.errors %}
             <p class="mt-1 text-xs text-red-600">{{ form.password.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Confirm Password -->
+        <div>
+          <label for="id_confirm_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+          {{ form.confirm_password }}
+          {% if form.confirm_password.errors %}
+            <p class="mt-1 text-xs text-red-600">{{ form.confirm_password.errors.0 }}</p>
           {% endif %}
         </div>
 
@@ -74,13 +96,13 @@
                  shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700
                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
                  transition-colors">
-          Sign In →
+          Create Account →
         </button>
       </form>
 
       <p class="text-center text-sm text-gray-500">
-        Don't have an account?
-        <a href="{% url 'signup' %}" class="text-indigo-600 hover:text-indigo-500 font-medium">Sign up</a>
+        Already have an account?
+        <a href="{% url 'login' %}" class="text-indigo-600 hover:text-indigo-500 font-medium">Sign in</a>
       </p>
     </div>
 

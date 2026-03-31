@@ -2,6 +2,16 @@ from django import forms
 
 
 class LoginForm(forms.Form):
+    ROLE_CHOICES = [
+        ('company', 'Company'),
+        ('annotator', 'Annotator'),
+    ]
+
+    role = forms.ChoiceField(
+        choices=ROLE_CHOICES,
+        widget=forms.RadioSelect(),
+        initial='annotator',
+    )
     username = forms.CharField(
         max_length=150,
         widget=forms.TextInput(attrs={
@@ -47,6 +57,61 @@ class TaskUploadForm(forms.Form):
         choices=ANSWER_TYPE_CHOICES,
         widget=forms.RadioSelect(),
     )
+
+
+class SignupForm(forms.Form):
+    ROLE_CHOICES = [
+        ('company', 'Company'),
+        ('annotator', 'Annotator'),
+    ]
+
+    role = forms.ChoiceField(
+        choices=ROLE_CHOICES,
+        widget=forms.RadioSelect(),
+        initial='annotator',
+    )
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500',
+            'placeholder': 'Choose a username',
+            'autofocus': True,
+        })
+    )
+    email = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500',
+            'placeholder': 'Email (optional)',
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500',
+            'placeholder': 'Password',
+        })
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500',
+            'placeholder': 'Confirm password',
+        })
+    )
+
+    def clean_username(self):
+        from .models import User
+        username = self.cleaned_data['username']
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('That username is already taken.')
+        return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+        pw = cleaned_data.get('password')
+        cpw = cleaned_data.get('confirm_password')
+        if pw and cpw and pw != cpw:
+            raise forms.ValidationError('Passwords do not match.')
+        return cleaned_data
 
 
 class AnnotationForm(forms.Form):

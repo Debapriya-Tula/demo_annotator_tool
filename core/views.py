@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .decorators import role_required
-from .forms import AnnotationForm, LoginForm, TaskUploadForm
+from .forms import AnnotationForm, LoginForm, SignupForm, TaskUploadForm
 from .models import Annotation, Task
 
 
@@ -28,11 +28,15 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome back, {user.username}!')
-                if user.role == 'company':
-                    return redirect('company_upload')
-                return redirect('annotator_dashboard')
+                selected_role = form.cleaned_data['role']
+                if user.role != selected_role:
+                    messages.error(request, f'This account is not registered as a {selected_role}.')
+                else:
+                    login(request, user)
+                    messages.success(request, f'Welcome back, {user.username}!')
+                    if user.role == 'company':
+                        return redirect('company_upload')
+                    return redirect('annotator_dashboard')
             else:
                 messages.error(request, 'Invalid username or password. Please try again.')
 
@@ -43,6 +47,35 @@ def logout_view(request):
     """Log the user out and redirect to login."""
     logout(request)
     messages.info(request, 'You have been logged out.')
+    return redirect('login')
+
+
+def signup_view(request):
+    """Sign up as a company or annotator."""
+    if request.user.is_authenticated:
+        if request.user.role == 'company':
+            return redirect('company_upload')
+        return redirect('annotator_dashboard')
+
+    form = SignupForm()
+
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            from .models import User
+            user = User.objects.create_user(
+                username=form.cleaned_data['username'],
+                email=form.cleaned_data.get('email', ''),
+                password=form.cleaned_data['password'],
+                role=form.cleaned_data['role'],
+            )
+            login(request, user)
+            messages.success(request, f'Account created! Welcome, {user.username}.')
+            if user.role == 'company':
+                return redirect('company_upload')
+            return redirect('annotator_dashboard')
+
+    return render(request, 'signup.html', {'form': form})
     return redirect('login')
 
 
