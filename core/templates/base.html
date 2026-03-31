@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Annotation Platform{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full flex flex-col">
+
+  {% if user.is_authenticated %}
+  <nav class="bg-indigo-700 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Brand -->
+        <div class="flex items-center gap-3">
+          <span class="text-white font-bold text-lg tracking-tight">🏷️ AnnotatePro</span>
+          <span class="text-indigo-200 text-sm">&mdash; {{ user.get_role_display }} Portal</span>
+        </div>
+
+        <!-- Nav links + logout -->
+        <div class="flex items-center gap-4">
+          {% if user.role == 'company' %}
+            <a href="{% url 'company_upload' %}" class="text-indigo-100 hover:text-white text-sm font-medium transition-colors">Upload Task</a>
+            <a href="{% url 'company_results' %}" class="text-indigo-100 hover:text-white text-sm font-medium transition-colors">Results</a>
+          {% elif user.role == 'annotator' %}
+            <a href="{% url 'annotator_dashboard' %}" class="text-indigo-100 hover:text-white text-sm font-medium transition-colors">Dashboard</a>
+          {% endif %}
+
+          <span class="text-indigo-300 text-sm">{{ user.username }}</span>
+          <a href="{% url 'logout' %}"
+             class="bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors">
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  <!-- Flash messages -->
+  {% if messages %}
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-4">
+    {% for message in messages %}
+    <div class="flex items-center gap-3 px-4 py-3 rounded-lg mb-2 text-sm font-medium
+      {% if message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200
+      {% elif message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200
+      {% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-800 border border-yellow-200
+      {% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+      <span>
+        {% if message.tags == 'error' %}❌
+        {% elif message.tags == 'success' %}✅
+        {% elif message.tags == 'warning' %}⚠️
+        {% else %}ℹ️{% endif %}
+      </span>
+      <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Page content -->
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-200 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 py-4 text-center text-xs text-gray-400">
+      © {% now "Y" %} AnnotatePro — Data Annotation Platform
+    </div>
+  </footer>
+
+</body>
+</html>

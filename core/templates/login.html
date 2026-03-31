@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Login — AnnotatePro{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+  <div class="max-w-md w-full space-y-8">
+
+    <!-- Header -->
+    <div class="text-center">
+      <div class="text-5xl mb-4">🏷️</div>
+      <h1 class="text-3xl font-extrabold text-gray-900">AnnotatePro</h1>
+      <p class="mt-2 text-sm text-gray-500">Data annotation platform for companies and annotators</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-white rounded-2xl shadow-md p-8 space-y-6">
+      <h2 class="text-xl font-semibold text-gray-800 text-center">Sign in to your account</h2>
+
+      <form method="post" class="space-y-5">
+        {% csrf_token %}
+
+        <div>
+          <label for="id_username" class="block text-sm font-medium text-gray-700 mb-1">
+            Username
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <p class="mt-1 text-xs text-red-600">{{ form.username.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div>
+          <label for="id_password" class="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
+          {{ form.password }}
+          {% if form.password.errors %}
+            <p class="mt-1 text-xs text-red-600">{{ form.password.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <button
+          type="submit"
+          class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg
+                 shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700
+                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                 transition-colors">
+          Sign In →
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-gray-400">
+        Contact your administrator if you need access.
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
