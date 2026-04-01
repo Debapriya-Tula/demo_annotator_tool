@@ -76,7 +76,6 @@ def signup_view(request):
             return redirect('annotator_dashboard')
 
     return render(request, 'signup.html', {'form': form})
-    return redirect('login')
 
 
 @role_required('company')
