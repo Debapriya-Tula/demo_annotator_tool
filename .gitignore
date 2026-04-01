@@ -6,3 +6,7 @@ db.sqlite3
 staticfiles/
 *.log
 .DS_Store
+*.Zone.Identifier
+.env
+.env.ready
+db.sqlite3
