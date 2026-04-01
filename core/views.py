@@ -131,40 +131,49 @@ def company_results(request):
 @role_required('annotator')
 def annotator_dashboard(request):
     """
-    Annotator dashboard — show the latest Task and handle answer submission.
-    Skips tasks already annotated by this user.
+    Annotator dashboard — list all tasks pending annotation by this user.
     """
-    # Find the latest task this annotator has NOT yet annotated
     annotated_task_ids = Annotation.objects.filter(
         annotator=request.user
     ).values_list('task_id', flat=True)
 
-    task = Task.objects.exclude(id__in=annotated_task_ids).order_by('-created_at').first()
+    pending_tasks = Task.objects.exclude(id__in=annotated_task_ids).order_by('-created_at')
+    completed_tasks = Task.objects.filter(id__in=annotated_task_ids).order_by('-created_at')
 
-    if request.method == 'POST' and task:
-        answer_type = task.answer_type
+    return render(request, 'annotator/dashboard.html', {
+        'pending_tasks': pending_tasks,
+        'completed_tasks': completed_tasks,
+    })
 
-        if answer_type == 'yes_no':
+
+@role_required('annotator')
+def annotate_task(request, task_id):
+    """
+    Show a single task and handle answer submission.
+    """
+    task = get_object_or_404(Task, id=task_id)
+
+    # Redirect if already answered
+    if Annotation.objects.filter(task=task, annotator=request.user).exists():
+        messages.info(request, 'You have already answered this task.')
+        return redirect('annotator_dashboard')
+
+    if request.method == 'POST':
+        if task.answer_type == 'yes_no':
             answer = request.POST.get('answer')
             if answer not in ('Yes', 'No'):
                 messages.error(request, 'Please select Yes or No.')
-                return render(request, 'annotator/dashboard.html', {'task': task})
+                return render(request, 'annotator/task.html', {'task': task})
         else:
             form = AnnotationForm(request.POST)
-            if form.is_valid():
-                answer = form.cleaned_data['answer']
-            else:
+            if not form.is_valid():
                 messages.error(request, 'Please provide a valid answer.')
-                return render(request, 'annotator/dashboard.html', {'task': task, 'form': form})
+                return render(request, 'annotator/task.html', {'task': task, 'form': form})
+            answer = form.cleaned_data['answer']
 
-        # Save annotation
-        Annotation.objects.create(
-            task=task,
-            annotator=request.user,
-            answer=answer,
-        )
-        messages.success(request, 'Answer submitted! Loading next task...')
+        Annotation.objects.create(task=task, annotator=request.user, answer=answer)
+        messages.success(request, 'Answer submitted!')
         return redirect('annotator_dashboard')
 
-    form = AnnotationForm() if task and task.answer_type == 'free_text' else None
-    return render(request, 'annotator/dashboard.html', {'task': task, 'form': form})
+    form = AnnotationForm() if task.answer_type == 'free_text' else None
+    return render(request, 'annotator/task.html', {'task': task, 'form': form})

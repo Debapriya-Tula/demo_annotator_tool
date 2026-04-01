@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Annotate Task — AnnotatePro{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+
+  <!-- Back link -->
+  <a href="{% url 'annotator_dashboard' %}"
+     class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-500 mb-6">
+    ← Back to all tasks
+  </a>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+    <!-- File preview -->
+    <div class="bg-gray-50 border-b border-gray-100 p-6 flex items-center justify-center min-h-64">
+      {% if task.file_type == 'image' %}
+        <img src="{{ task.file_url }}" alt="Task image"
+             class="max-h-96 max-w-full rounded-lg shadow object-contain">
+      {% else %}
+        <iframe src="{{ task.file_url }}" class="w-full h-96 rounded-lg border border-gray-200"
+                title="Task PDF"></iframe>
+      {% endif %}
+    </div>
+
+    <!-- Question + Answer -->
+    <div class="p-6 space-y-6">
+
+      <!-- Question -->
+      <div>
+        <span class="text-xs font-semibold uppercase tracking-wide text-gray-400">Question</span>
+        <p class="mt-1 text-lg font-semibold text-gray-900">{{ task.question }}</p>
+        <div class="mt-2 flex gap-2">
+          <span class="text-xs text-gray-400">{{ task.created_at|date:"M d, Y" }}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full
+            {% if task.answer_type == 'yes_no' %}bg-blue-50 text-blue-700{% else %}bg-purple-50 text-purple-700{% endif %}">
+            {% if task.answer_type == 'yes_no' %}Yes / No{% else %}Free Text{% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- Answer form -->
+      <form method="post">
+        {% csrf_token %}
+
+        {% if task.answer_type == 'yes_no' %}
+          <p class="text-sm font-medium text-gray-700 mb-3">Your answer:</p>
+          <div class="flex gap-4">
+            <button type="submit" name="answer" value="Yes"
+                    class="flex-1 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white
+                           font-bold text-lg transition-colors shadow-sm">
+              ✅ Yes
+            </button>
+            <button type="submit" name="answer" value="No"
+                    class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white
+                           font-bold text-lg transition-colors shadow-sm">
+              ❌ No
+            </button>
+          </div>
+
+        {% else %}
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Your answer:</label>
+            {{ form.answer }}
+            {% if form.answer.errors %}
+              <p class="mt-1 text-xs text-red-600">{{ form.answer.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <button type="submit"
+                  class="mt-4 w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700
+                         text-white font-semibold transition-colors">
+            Submit Answer →
+          </button>
+        {% endif %}
+
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

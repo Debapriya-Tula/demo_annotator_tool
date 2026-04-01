@@ -9,4 +9,5 @@ urlpatterns = [
     path('company/upload/', views.company_upload, name='company_upload'),
     path('company/results/', views.company_results, name='company_results'),
     path('annotator/', views.annotator_dashboard, name='annotator_dashboard'),
+    path('annotator/task/<int:task_id>/', views.annotate_task, name='annotate_task'),
 ]
